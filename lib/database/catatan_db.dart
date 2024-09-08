@@ -22,7 +22,7 @@ class CatatanDB{
 
   Future<int> insert({required String judul, required String isi}) async {
     final database = await CatatanService().database;
-    
+
     return await database.rawInsert(
       '''INSERT INTO $nama_tabel (judul, isi, created_at) VALUES (?, ?, ?)''',
       [judul, isi, DateTime.now().millisecondsSinceEpoch],
@@ -31,7 +31,7 @@ class CatatanDB{
 
   Future<List<ModelCatatan>> getAll() async{
     final database = await CatatanService().database;
-    final catatan = await database.rawQuery(''' SELECT * FROM $nama_tabel ORDER BY COALESCE(updated_at,created_at); ''');
+    final catatan = await database.rawQuery(''' SELECT * FROM $nama_tabel ORDER BY COALESCE(updated_at,created_at) DESC; ''');
     return catatan.map((catatan) => ModelCatatan.fromSqfliteDatabase(catatan)).toList();
   }
 

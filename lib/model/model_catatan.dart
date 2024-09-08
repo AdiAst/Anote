@@ -19,7 +19,7 @@ class ModelCatatan{
   factory ModelCatatan.fromSqfliteDatabase(Map<String,dynamic> map)=> ModelCatatan(
     id: map['id']?.toInt() ?? 0, 
     judul: map['judul'] ?? '', 
-    isi: map['judul'] ?? '', 
+    isi: map['isi'] ?? '', 
     createdAt: DateTime.fromMicrosecondsSinceEpoch(map['created_at']).toIso8601String(),
     updatedAt: map['updated_at'] == null ? null : DateTime.fromMicrosecondsSinceEpoch(map['updated_at']).toIso8601String(),
     );

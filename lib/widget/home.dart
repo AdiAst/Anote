@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anote/database/catatan_db.dart';
 import 'package:anote/model/model_catatan.dart';
+import 'package:anote/widget/catatan.dart';
 import 'package:flutter/material.dart';
 import 'package:anote/widget/kartu_catatan.dart';
 
@@ -20,19 +21,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _ambilCatatan();
+    ambilCatatan();
   }
 
-  void _ambilCatatan() {
+  void ambilCatatan() {
     setState(() {
       daftarCatatan = dbCatatan.getAll();
     });
-  }
-
-  void _tambahCatatan() {
-    dbCatatan.insert(judul: "ipsum", isi: "ipsum");
-    if(!mounted) return;
-    _ambilCatatan();
   }
 
   @override
@@ -50,21 +45,26 @@ class _MyHomePageState extends State<MyHomePage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No notes available.'));
+            return const Center(child: Text('Tidak ada catatan.'));
           } else {
             final catatanList = snapshot.data!;
             return ListView.builder(
               itemCount: catatanList.length,
               itemBuilder: (context, index) {
                 final catatan = catatanList[index];
-                return KartuCatatan(judulCatatan: catatan.judul);
+                return KartuCatatan(judulCatatan: catatan.judul, id: catatan.id,);
               },
             );
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _tambahCatatan,
+        onPressed:(){ 
+          Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => const Catatan())  
+          );
+        },
         tooltip: 'Tambah',
         child: const Icon(Icons.add),
       ),
