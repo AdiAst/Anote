@@ -2,7 +2,7 @@ import 'package:anote/widget/catatan.dart';
 import 'package:flutter/material.dart';
 
 class KartuCatatan extends StatelessWidget {
-  const KartuCatatan({Key? key, required this.judulCatatan}) : super(key: key);
+  const KartuCatatan({super.key, required this.judulCatatan});
 
   final String judulCatatan;
 

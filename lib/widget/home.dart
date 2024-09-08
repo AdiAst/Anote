@@ -1,8 +1,9 @@
+import 'dart:async';
+
+import 'package:anote/database/catatan_db.dart';
+import 'package:anote/model/model_catatan.dart';
 import 'package:flutter/material.dart';
 import 'package:anote/widget/kartu_catatan.dart';
-
-import 'package:mysql_client/mysql_client.dart';
-import 'package:http/http.dart' as http;
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -13,12 +14,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  final List<String> _catatanList = ["Catatan 1", "Catatan 2", "Catatan 3", "Catatan 4","Catatan 5", "Catatan 6", "Catatan 7", "Catatan 8"];
-  void _incrementCounter() {
+  Future<List<ModelCatatan>>? daftarCatatan;
+  final dbCatatan = CatatanDB();
+
+  @override
+  void initState() {
+    super.initState();
+    _ambilCatatan();
+  }
+
+  void _ambilCatatan() {
     setState(() {
-      _counter++;
+      daftarCatatan = dbCatatan.getAll();
     });
+  }
+
+  void _tambahCatatan() {
+    dbCatatan.insert(judul: "ipsum", isi: "ipsum");
+    if(!mounted) return;
+    _ambilCatatan();
   }
 
   @override
@@ -28,17 +42,32 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: ListView.builder(
-        itemCount: _catatanList.length,
-        itemBuilder: (context, index) {
-          return KartuCatatan(judulCatatan: _catatanList[index]);
+      body: FutureBuilder<List<ModelCatatan>>(
+        future: daftarCatatan,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No notes available.'));
+          } else {
+            final catatanList = snapshot.data!;
+            return ListView.builder(
+              itemCount: catatanList.length,
+              itemBuilder: (context, index) {
+                final catatan = catatanList[index];
+                return KartuCatatan(judulCatatan: catatan.judul);
+              },
+            );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: _tambahCatatan,
+        tooltip: 'Tambah',
         child: const Icon(Icons.add),
-      ), 
+      ),
     );
   }
 }

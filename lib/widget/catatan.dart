@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 
 class Catatan extends StatelessWidget {
-  const Catatan({Key? key, required this.catatan}) : super(key: key);
+  const Catatan({super.key, required this.catatan});
   final String catatan;
   @override
   Widget build(BuildContext context) {
