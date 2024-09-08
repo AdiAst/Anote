@@ -1,15 +1,14 @@
-
-
 import 'package:anote/database/service.dart';
 import 'package:anote/model/model_catatan.dart';
 import 'package:sqflite/sqflite.dart';
 
-class CatatanDB{
-  final nama_tabel = 'catatan';
+class CatatanDB {
+  final String namaTabel = 'catatan';
 
-  Future<void> create(Database database)async{
-    await database.execute("""
-      CREATE TABLE IF NOT EXISTS $nama_tabel (
+  /// Membuat tabel catatan di database jika belum ada.
+  Future<void> create(Database database) async {
+    await database.execute('''
+      CREATE TABLE IF NOT EXISTS $namaTabel (
         "id" INTEGER NOT NULL,
         "judul" TEXT NOT NULL,
         "isi" TEXT NOT NULL,
@@ -17,47 +16,62 @@ class CatatanDB{
         "updated_at" INTEGER,
         PRIMARY KEY ("id" AUTOINCREMENT)
       );
-    """);
+    ''');
   }
 
+  /// Menambahkan catatan baru ke dalam database.
+  /// Mengembalikan ID catatan yang dimasukkan.
   Future<int> insert({required String judul, required String isi}) async {
     final database = await CatatanService().database;
-
     return await database.rawInsert(
-      '''INSERT INTO $nama_tabel (judul, isi, created_at) VALUES (?, ?, ?)''',
+      '''INSERT INTO $namaTabel (judul, isi, created_at) VALUES (?, ?, ?)''',
       [judul, isi, DateTime.now().millisecondsSinceEpoch],
     );
   }
 
-  Future<List<ModelCatatan>> getAll() async{
+  /// Mengambil semua catatan dari database, diurutkan berdasarkan 
+  /// `updated_at` atau `created_at` jika `updated_at` tidak ada.
+  Future<List<ModelCatatan>> getAll() async {
     final database = await CatatanService().database;
-    final catatan = await database.rawQuery(''' SELECT * FROM $nama_tabel ORDER BY COALESCE(updated_at,created_at) DESC; ''');
-    return catatan.map((catatan) => ModelCatatan.fromSqfliteDatabase(catatan)).toList();
+    final List<Map<String, dynamic>> catatan = await database.rawQuery(
+      ''' SELECT * FROM $namaTabel ORDER BY COALESCE(updated_at, created_at) DESC; '''
+    );
+    return catatan.map((data) => ModelCatatan.fromSqfliteDatabase(data)).toList();
   }
 
-  Future<ModelCatatan> getById(int id) async{
+  /// Mengambil catatan berdasarkan [id].
+  Future<ModelCatatan> getById(int id) async {
     final database = await CatatanService().database;
-    final catatan = await database.rawQuery(''' SELECT * FROM $nama_tabel WHERE id = ? ''',[id]);
+    final List<Map<String, dynamic>> catatan = await database.rawQuery(
+      ''' SELECT * FROM $namaTabel WHERE id = ? ''',
+      [id],
+    );
     return ModelCatatan.fromSqfliteDatabase(catatan.first);
   }
 
-  Future<int> update({required int id, String? judul, String? isi}) async{
+  /// Memperbarui catatan berdasarkan [id].
+  /// Hanya data yang tidak null yang akan diperbarui.
+  Future<int> update({required int id, String? judul, String? isi}) async {
     final database = await CatatanService().database;
     return await database.update(
-      nama_tabel,
+      namaTabel,
       {
-        if (judul != null) 'judul':judul,
-        if (isi != null) 'isi':isi,
+        if (judul != null) 'judul': judul,
+        if (isi != null) 'isi': isi,
         'updated_at': DateTime.now().millisecondsSinceEpoch,
       },
-      where: 'id=?',
-      conflictAlgorithm: ConflictAlgorithm.rollback,
+      where: 'id = ?',
       whereArgs: [id],
-      
+      conflictAlgorithm: ConflictAlgorithm.rollback,
     );
   }
-  Future<void> delete(int id) async{
+
+  /// Menghapus catatan berdasarkan [id].
+  Future<void> delete(int id) async {
     final database = await CatatanService().database;
-    await database.rawDelete(''' DELETE FROM $nama_tabel WHERE id = ? ''',[id]);
+    await database.rawDelete(
+      ''' DELETE FROM $namaTabel WHERE id = ? ''',
+      [id],
+    );
   }
 }

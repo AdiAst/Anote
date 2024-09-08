@@ -3,6 +3,9 @@ import 'package:anote/widget/catatan.dart';
 import 'package:anote/widget/home.dart';
 import 'package:flutter/material.dart';
 
+/// Widget untuk menampilkan catatan dalam bentuk kartu.
+/// Kartu ini menampilkan [judulCatatan] dan memiliki fungsi
+/// untuk menampilkan detail catatan saat di klik dan menghapusnya.
 class KartuCatatan extends StatelessWidget {
   const KartuCatatan({
     super.key, 
@@ -19,7 +22,10 @@ class KartuCatatan extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.hardEdge,
         child: InkWell(
+          // Warna saat kartu ditekan.
           splashColor: Colors.blue.withAlpha(30),
+
+          // Aksi saat kartu ditekan, menampilkan detail catatan.
           onTap: () {
             Navigator.push(
               context,
@@ -28,6 +34,8 @@ class KartuCatatan extends StatelessWidget {
               ),
             );
           },
+
+          // Tampilan kartu catatan.
           child: Stack(
             children: [
               SizedBox(
@@ -40,20 +48,27 @@ class KartuCatatan extends StatelessWidget {
                   ),
                 ),
               ),
+              
+              // Tombol hapus yang terletak di pojok kanan atas kartu.
               Positioned(
                 top: 8,
                 right: 8,
                 child: IconButton(
-                  icon: const Icon(Icons.delete), 
-                  onPressed: () {
-                    CatatanDB().delete(id);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const MyHomePage(title: 'ANOTE'),
-                        ),
-                      );
+                  icon: const Icon(Icons.delete),
+
+                  // Aksi saat tombol hapus ditekan.
+                  onPressed: () async {
+                    // Hapus catatan dari database.
+                    await CatatanDB().delete(id);
+                    
+                    // Kembali ke halaman utama setelah penghapusan catatan.
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyHomePage(title: 'ANOTE'),
+                      ),
+                      (Route<dynamic> route) => false,
+                    );
                   },
                 ),
               ),

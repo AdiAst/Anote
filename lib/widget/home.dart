@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:anote/database/catatan_db.dart';
 import 'package:anote/model/model_catatan.dart';
 import 'package:anote/widget/catatan.dart';
@@ -15,6 +14,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   Future<List<ModelCatatan>>? daftarCatatan;
   final dbCatatan = CatatanDB();
 
@@ -24,6 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ambilCatatan();
   }
 
+  /// Mengambil daftar catatan dari database dan memperbarui state.
   void ambilCatatan() {
     setState(() {
       daftarCatatan = dbCatatan.getAll();
@@ -40,29 +41,40 @@ class _MyHomePageState extends State<MyHomePage> {
       body: FutureBuilder<List<ModelCatatan>>(
         future: daftarCatatan,
         builder: (context, snapshot) {
+          // Indikator loading.
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
+          } 
+          // Jika ada error, tampilkan pesan error.
+          else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } 
+          // Jika data kosong atau tidak ada catatan, tampilkan pesan kosong.
+          else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Tidak ada catatan.'));
-          } else {
+          } 
+          // Jika data ada, tampilkan daftar catatan.
+          else {
             final catatanList = snapshot.data!;
             return ListView.builder(
               itemCount: catatanList.length,
               itemBuilder: (context, index) {
                 final catatan = catatanList[index];
-                return KartuCatatan(judulCatatan: catatan.judul, id: catatan.id,);
+                return KartuCatatan(
+                  judulCatatan: catatan.judul,
+                  id: catatan.id,
+                );
               },
             );
           }
         },
       ),
+      // Tombol aksi untuk menambahkan catatan baru.
       floatingActionButton: FloatingActionButton(
-        onPressed:(){ 
+        onPressed: () { 
           Navigator.push(
             context, 
-            MaterialPageRoute(builder: (context) => const Catatan())  
+            MaterialPageRoute(builder: (context) => const Catatan())
           );
         },
         tooltip: 'Tambah',
